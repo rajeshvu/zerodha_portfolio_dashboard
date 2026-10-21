@@ -1,0 +1,20 @@
+# Local Python environment and generated files
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+
+# Local credentials and Kite session tokens
+.env
+.env.*
+!.env.example
+access_token.json
+
+# Local portfolio history and SQLite transient files
+*.sqlite3
+*.sqlite3-journal
+*.db
+*.db-journal
+
+# Windows and editor files
+Thumbs.db
