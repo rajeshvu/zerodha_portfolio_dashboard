@@ -134,6 +134,10 @@ def create_history_chart(history):
             color=alt.Color(
                 field="series",
                 type="nominal",
+                scale=alt.Scale(
+                    domain=["Invested value (approx.)", "Portfolio value"],
+                    scheme="blues"
+                ),
                 title="",
                 legend=alt.Legend(
                     orient="top",
@@ -146,6 +150,64 @@ def create_history_chart(history):
                     type="temporal",
                     title="Date",
                 ),
+                alt.Tooltip(field="series", type="nominal", title="Series"),
+                alt.Tooltip(
+                    field="formatted_value",
+                    type="nominal",
+                    title="Value",
+                ),
+            ],
+        )
+    )
+
+
+def create_holding_comparison_chart(holdings, name_field):
+    chart_data = holdings[
+        [name_field, "Invested amount (approx. ₹)", "Current value (₹)"]
+    ].melt(
+        id_vars=[name_field],
+        var_name="series",
+        value_name="value",
+    )
+    chart_data["series"] = chart_data["series"].map(
+        {
+            "Invested amount (approx. ₹)": "Invested amount",
+            "Current value (₹)": "Current value",
+        }
+    )
+    chart_data["formatted_value"] = chart_data["value"].map(format_inr)
+
+    return (
+        alt.Chart(chart_data)
+        .mark_bar()
+        .encode(
+            x=alt.X(field=name_field, type="nominal", sort="-y", title=None),
+            xOffset=alt.XOffset(
+                field="series",
+                type="nominal",
+                sort=["Invested amount", "Current value"],
+            ),
+            y=alt.Y(
+                field="value",
+                type="quantitative",
+                axis=alt.Axis(labelExpr=INDIAN_CURRENCY_AXIS),
+                title="Value",
+            ),
+            color=alt.Color(
+                field="series",
+                type="nominal",
+                scale=alt.Scale(
+                    domain=["Invested amount", "Current value"],
+                    scheme="blues"
+                ),
+                title="",
+                legend=alt.Legend(
+                    orient="top",
+                    direction="horizontal",
+                ),
+            ),
+            tooltip=[
+                alt.Tooltip(field=name_field, type="nominal"),
                 alt.Tooltip(field="series", type="nominal", title="Series"),
                 alt.Tooltip(
                     field="formatted_value",
@@ -227,11 +289,11 @@ def create_dashboard_rows(holdings):
             {
                 "Fund": holding.get("fund", "Unknown fund"),
                 "ISIN": holding.get("tradingsymbol", ""),
+                "Invested amount (approx. ₹)": quantity * average_price,
+                "Current value (₹)": quantity * nav,
                 "Units": quantity,
                 "NAV (₹)": nav,
                 "NAV date": holding.get("last_price_date") or "Not provided",
-                "Current value (₹)": quantity * nav,
-                "Invested amount (approx. ₹)": quantity * average_price,
                 "Unrealized P&L (approx. ₹)": quantity * (nav - average_price),
             }
         )
@@ -251,12 +313,12 @@ def create_stock_dashboard_rows(holdings):
                 "Symbol": holding.get("tradingsymbol", "Unknown"),
                 "Exchange": holding.get("exchange", ""),
                 "ISIN": holding.get("isin", ""),
+                "Invested amount (approx. ₹)": quantity * average_price,
+                "Current value (₹)": quantity * last_price,
                 "Quantity": quantity,
                 "T+1 quantity": t1_quantity,
                 "Average price (₹)": average_price,
                 "Last price (₹)": last_price,
-                "Current value (₹)": quantity * last_price,
-                "Invested amount (approx. ₹)": quantity * average_price,
                 "Unrealized P&L (approx. ₹)": quantity
                 * (last_price - average_price),
                 "Day change (%)": holding.get("day_change_percentage"),
@@ -745,33 +807,17 @@ def main():
                     width="stretch",
                     hide_index=True,
                 )
-                fund_chart = holdings_df.copy()
                 fund_chart = pd.DataFrame(
                     {
                         "fund": holdings_df["Fund"],
-                        "value": holdings_df["Current value (₹)"],
+                        "Invested amount (approx. ₹)": holdings_df[
+                            "Invested amount (approx. ₹)"
+                        ],
+                        "Current value (₹)": holdings_df["Current value (₹)"],
                     }
                 )
-                fund_chart["formatted_value"] = fund_chart["value"].map(format_inr)
                 st.altair_chart(
-                    alt.Chart(fund_chart)
-                    .mark_bar()
-                    .encode(
-                        x=alt.X(field="fund", type="nominal", sort="-y"),
-                        y=alt.Y(
-                            field="value",
-                            type="quantitative",
-                            axis=alt.Axis(labelExpr=INDIAN_CURRENCY_AXIS),
-                        ),
-                        tooltip=[
-                            alt.Tooltip(field="fund", type="nominal"),
-                            alt.Tooltip(
-                                field="formatted_value",
-                                type="nominal",
-                                title="Current value",
-                            ),
-                        ],
-                    ),
+                    create_holding_comparison_chart(fund_chart, "fund"),
                     width="stretch",
                 )
             else:
@@ -879,29 +925,14 @@ def main():
                 stock_chart = pd.DataFrame(
                     {
                         "symbol": holdings_df["Symbol"],
-                        "value": holdings_df["Current value (₹)"],
+                        "Invested amount (approx. ₹)": holdings_df[
+                            "Invested amount (approx. ₹)"
+                        ],
+                        "Current value (₹)": holdings_df["Current value (₹)"],
                     }
                 )
-                stock_chart["formatted_value"] = stock_chart["value"].map(format_inr)
                 st.altair_chart(
-                    alt.Chart(stock_chart)
-                    .mark_bar()
-                    .encode(
-                        x=alt.X(field="symbol", type="nominal", sort="-y"),
-                        y=alt.Y(
-                            field="value",
-                            type="quantitative",
-                            axis=alt.Axis(labelExpr=INDIAN_CURRENCY_AXIS),
-                        ),
-                        tooltip=[
-                            alt.Tooltip(field="symbol", type="nominal"),
-                            alt.Tooltip(
-                                field="formatted_value",
-                                type="nominal",
-                                title="Current value",
-                            ),
-                        ],
-                    ),
+                    create_holding_comparison_chart(stock_chart, "symbol"),
                     width="stretch",
                 )
             else:
@@ -973,6 +1004,14 @@ def main():
                 ),
                 width="stretch",
                 hide_index=True,
+            )
+            st.subheader("Invested vs current value by portfolio")
+            st.altair_chart(
+                create_holding_comparison_chart(
+                    summary_df[summary_df["Portfolio"] != "Combined total"],
+                    "Portfolio",
+                ),
+                width="stretch",
             )
             st.caption(
                 "Headline and summary values are abbreviated in lakh/crore where "
@@ -1070,6 +1109,27 @@ def main():
                 st.rerun()
             except (ValueError, sqlite3.Error) as error:
                 st.error(f"Could not save custom investments: {error}")
+
+        if custom_records:
+            st.subheader("Invested vs current value by investment")
+            custom_chart = pd.DataFrame(
+                {
+                    "investment": [
+                        f"{row['Investment']} ({row['Type']})"
+                        for row in custom_records
+                    ],
+                    "Invested amount (approx. ₹)": [
+                        row["Invested amount (₹)"] for row in custom_records
+                    ],
+                    "Current value (₹)": [
+                        row["Current value (₹)"] for row in custom_records
+                    ],
+                }
+            )
+            st.altair_chart(
+                create_holding_comparison_chart(custom_chart, "investment"),
+                width="stretch",
+            )
 
         st.subheader("Daily custom investment value history")
         custom_history = load_custom_history()
