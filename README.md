@@ -34,11 +34,19 @@ remain in rupees.
 
 Open the local URL printed by Streamlit. Use the **Mutual funds** and **Stocks**
 tabs to view each portfolio, and **Summary** to see combined invested amount,
-current value, unrealized profit/loss, and a combined history chart. Refresh
-both portfolio tabs on the same day to add a combined history point. Refresh
-each portfolio tab separately to fetch the latest holdings and save its daily
-snapshot. The stock tab covers long-term equity holdings, includes T+1 unsettled
-shares, and does not include open intraday or futures and options positions.
+current value, unrealized profit/loss, and a combined history chart. Use
+**Custom investments** to add or edit assets such as FD, RD, EPF, and PPF; click
+**Save custom investments** to store those values locally. Enter amounts as
+whole rupees using Indian comma grouping (for example, `1,23,456`). Custom
+investments are included in Summary totals and in the combined history from
+their first saved snapshot. The Custom investments tab has its own daily
+history chart; it records the saved values when you open the dashboard and when
+you save edits, with at most one snapshot per day. Refresh both Kite portfolio
+tabs on the same day to add a combined history point. Refresh each Kite
+portfolio tab separately to fetch the latest holdings and save its daily
+snapshot. The stock tab covers long-term equity holdings, includes T+1
+unsettled shares, and does not include open intraday or futures and options
+positions.
 
 ## Desktop shortcut
 
