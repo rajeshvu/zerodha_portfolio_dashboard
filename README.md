@@ -11,25 +11,44 @@ remain in rupees.
 
 ## Setup
 
-1. In your Kite developer app settings, set the redirect URL to exactly:
+1. Sign in to the [Kite Connect developer portal](https://developers.kite.trade/login)
+   with your Zerodha account.
+2. Create a new app in the developer portal (choose a personal app if prompted).
+   In the app settings, set the redirect URL to exactly:
    `http://127.0.0.1:8765/callback`
-2. Copy `.env.example` to `.env` and fill in your API key and API secret.
-   Keep `.env` private; do not share or commit it.
-3. In PowerShell, from this directory:
+3. Open the app's credentials/settings and copy its **API key** and **API
+   secret**. These are generated for the app; they are not your Zerodha login
+   password, Kite PIN, or TOTP. Keep the API secret private.
+4. In PowerShell, from this project directory, copy the environment template and
+   open it:
+
+   ```powershell
+   Copy-Item .env.example .env
+   notepad .env
+   ```
+
+   Set `KITE_API_KEY` and `KITE_API_SECRET` to the credentials from your
+   developer app. Save the file and do not share or commit `.env`.
+5. Create the Python environment and install dependencies. These commands use
+   the environment directly, so PowerShell script activation is not needed:
 
    ```powershell
    py -m venv .venv
-   .\.venv\Scripts\Activate.ps1
-   python -m pip install -r requirements.txt
-   python auth.py
+   .\.venv\Scripts\python.exe -m pip install -r requirements.txt
+   ```
+
+6. Start the Kite login flow:
+
+   ```powershell
+   .\.venv\Scripts\python.exe auth.py
    ```
 
    Complete the Zerodha login in the browser. The helper stores the resulting
    access token locally in `access_token.json`, which is excluded from Git.
-4. Start the dashboard:
+7. Start the dashboard:
 
    ```powershell
-   streamlit run dashboard.py
+   .\.venv\Scripts\python.exe -m streamlit run dashboard.py
    ```
 
 Open the local URL printed by Streamlit. Use the **Mutual funds** and **Stocks**
