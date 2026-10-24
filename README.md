@@ -9,6 +9,26 @@ in SQLite. Dashboard figures use Indian digit grouping (for example,
 and crore abbreviations for larger amounts; holding details and chart values
 remain in rupees.
 
+## Sample dashboards
+
+The screenshots below show sample views of the dashboard.
+
+### Summary
+
+![Portfolio summary dashboard](images/zerodha_portfolio_summary.png)
+
+### Mutual funds
+
+![Mutual fund dashboard](images/zerodha_portfolio_MF.png)
+
+### Stocks
+
+![Stock dashboard](images/zerodha_portfolio_stock.png)
+
+### Custom investments
+
+![Custom investments dashboard](images/zerodha_portfolio_custom.png)
+
 ## Setup
 
 1. Sign in to the [Kite Connect developer portal](https://developers.kite.trade/login)
